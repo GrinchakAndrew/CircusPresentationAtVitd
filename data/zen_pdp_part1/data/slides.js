@@ -1,0 +1,28 @@
+{
+	"collection" : ["data/zen_pdp_part1/data/slide1.html",
+					"data/zen_pdp_part1/data/slide2.html", 
+					"data/zen_pdp_part1/data/slide3.html", 
+					"data/zen_pdp_part1/data/slide4.html", 
+					"data/zen_pdp_part1/data/slide5.html", 
+					"data/zen_pdp_part1/data/slide6.html", 
+					"data/zen_pdp_part1/data/slide7.html",
+					"data/zen_pdp_part1/data/slide8.html",
+					"data/zen_pdp_part1/data/slide9.html",
+					"data/zen_pdp_part1/data/slide10.html", 
+					"data/zen_pdp_part1/data/slide11.html",
+					"data/zen_pdp_part1/data/slide12.html",
+					"data/zen_pdp_part1/data/slide13.html",
+					"data/zen_pdp_part1/data/slide14.html",
+					"data/zen_pdp_part1/data/slide15.html", 
+					"data/zen_pdp_part1/data/slide16.html", 
+					"data/zen_pdp_part1/data/slide17.html", 
+					"data/zen_pdp_part1/data/slide18.html", 
+					"data/zen_pdp_part1/data/slide19.html", 
+					"data/zen_pdp_part1/data/slide20.html",
+					"data/zen_pdp_part1/data/slide21.html", 
+					"data/zen_pdp_part1/data/slide22.html",
+					"data/zen_pdp_part1/data/slide23.html",
+					"data/zen_pdp_part1/data/slide24.html",
+					"data/zen_pdp_part1/data/slide25.html"
+					]
+}
