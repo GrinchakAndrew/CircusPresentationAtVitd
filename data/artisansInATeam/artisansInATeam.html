@@ -101,6 +101,7 @@
             instance.lastSlide = document.querySelector('.slide-wrapper:last-of-type') || document.querySelector('.slide-wrapper');
             instance.slideIndex = instance.lastSlide.getAttribute('index');
             instance.lastSlideOffsetTop = instance.lastSlide.offsetTop;
+
             if (instance.slideIndex && (~~instance.slideIndexArray.indexOf(instance.slideIndex) || !instance.slideIndexArray.length)) {
                 if (instance.lastSlide && (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop) + 10 >= (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop) / 2) {
                     instance.slideIndexArray.push(instance.slideIndex);
@@ -109,39 +110,33 @@
             }
             instance.m.slide(100);
         };
-        instance.clickHandler = function(e) {
-            var event = e || event,
-                target = event.target || event.srcElement,
-                _config;
-            if ((target.tagName === 'IMG' && instance.g(target.alt))) {
-                if (!instance.g(target.alt, 1)) {
-                    _config = new instance.F(target, instance.e, instance.g, instance.s, instance.u);
-                    instance.s(target.alt, '', _config);
-                }
-                if (instance.g(target.alt, 1)) {
-                    instance.g(target.alt, 1).o(target);
-                }
-            } else if (instance.c(e.target, 'TABLE', 'slide')) {
-                _config = !instance.instance ? new instance.F(target, instance.e, instance.g, instance.s, instance.u) : instance.instance;
-                _config.o(instance.c(e.target, 'TABLE', 'slide'));
-            }
-        };
-        instance.touchStartHandler = function(e) {
-            var event = e || event,
-                target = event.touches[0].target,
-                _config;
-            if ((target.tagName === 'IMG' && instance.g(target.alt))) {
-                if (!instance.g(target.alt, 1)) {
-                    _config = new instance.F(target, instance.e, instance.g, instance.s, instance.u);
-                    instance.s(target.alt, '', _config);
-                }
-                if (instance.g(target.alt, 1)) {
-                    instance.g(target.alt, 1).o(target);
-                }
-            } else if (instance.c(e.target, 'TABLE', 'slide')) {
-                _config = !instance.instance ? new instance.F(target, instance.e, instance.g, instance.s, instance.u) : instance.instance;
-                _config.o(instance.c(e.target, 'TABLE', 'slide'));
-            }
+		var clickHandler = function(e){
+			var event = e || event,
+			target = event.target || event.srcElement,
+			_config;
+			if (instance.c(e.target, 'TABLE', 'slide')) {
+				_config = !instance.instance ? new instance.F(target, instance.e, instance.g, instance.s, instance.u) : instance.instance;
+				_config.o(instance.c(e.target, 'TABLE', 'slide'));
+			}
+		};
+		instance.clickHandler = function(e) {
+            var clickCount = 0, timeout; 
+				return function(e){
+					clickCount++;
+					switch(clickCount){
+						case 1: {
+							timeout = setTimeout(function(){clickCount = 0;}, 450);
+							break;
+						}
+						case 2: {
+							clickCount = 0;
+							clearTimeout(timeout);
+							clickHandler(e);
+							console.log(2);
+							break;
+						}
+					}
+				}
         };
         instance.e(document, 'scroll', instance.scrollHandler);
         instance.setImgs();
@@ -149,11 +144,12 @@
         instance.e(document, 'keyup', instance.ani.handler);
         instance.e(document, 'mousedown', instance.ani.handler);
         instance.e(document, 'touchend', instance.ani.handler);
-        instance.e(document, 'click', instance.clickHandler);
-        instance.e(document, 'touchstart', instance.touchStartHandler);
+        instance.e(document, 'click', instance.clickHandler());
+        instance.e(document, 'touchstart', instance.clickHandler());
 	/*listening to .title onclick event to unsubscribe from DOM handlers per loaded item:*/
         $(document).on('instance.u', function() {
             if (instance) {
+				instance.u(document, 'click', instance.clickHandler);
                 instance.u(document, 'keyup', instance.ani.handler);
                 instance.u(document, 'mousedown', instance.ani.handler);
                 instance.u(document, 'touchend', instance.ani.handler);
@@ -166,7 +162,8 @@
 				}
                 $('#stickingMenu').remove();
             }
-        });    </script>
+        });
+</script>
 </head>
 <body>
     <div class="wrapper" id="wrapper">
