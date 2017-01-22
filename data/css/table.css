@@ -33,10 +33,10 @@
             padding: 0
         }
 		
-		li {
+/* 		li {
 			padding-bottom: 5px;
 		}
-        
+ */        
         .c16 {
             border-right-style: solid;
             padding: 28.3pt 28.3pt 28.3pt 28.3pt;
@@ -728,7 +728,6 @@
         }
         
         body {
-            background-color: #FEFFCE;
 			margin: 0;
         }
         
@@ -849,16 +848,12 @@
             color: #000000
         }
         
-        .title {
+		 .title {
             padding-top: 0pt;
             color: #000000;
-            font-size: 21pt;
             padding-bottom: 0pt;
-             
             line-height: 1.15;
             page-break-after: avoid;
-             
-             
             text-align: left
         }
         

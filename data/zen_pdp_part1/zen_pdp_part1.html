@@ -2,8 +2,6 @@
 <html>
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <link rel="stylesheet" type="text/css" href="data/css/table.css">
-    <link href="data/css/css.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript">
         var instance = new Config({
             "slide2": {
@@ -283,8 +281,10 @@
             }
         }, 'data/zen_pdp_part1/data/slides.js');
         /*interpolation of DOMReady Code:*/
+		instance.ani.deanimate(document.body);
         instance.m.slidesCol = Array.prototype.slice.call(document.querySelectorAll('.slide-wrapper'), 0);
         instance.m.buildMenu();
+		instance.ani.animate(document.body, 100, 0.03);
         /* var prettyprintedElCol = document.querySelectorAll('.prettyprinted');
         if (prettyprintedElCol.length) {
             Array.prototype.forEach.call(prettyprintedElCol, function(i, j) {
