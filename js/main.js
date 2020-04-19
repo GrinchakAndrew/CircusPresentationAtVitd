@@ -1,1033 +1,2101 @@
-﻿var Accordeon = function(wrapper, numberOfTitles, titlesHeight, tabsNumberByKey) {
-    'use strict';
-    this.wrapper = wrapper;
-    this.numberOfTitles = numberOfTitles;
-    this.titlesHeight = titlesHeight || 30;
-    this.tabsNumberByKey = tabsNumberByKey;
-}
-Accordeon.prototype.build = function(taskNames) {
-    'use strict';
-    var that = this,
-        elements = {
-            columniser: $('<div>', {
-                class: 'columniser'
-            }),
-            columniserText: $('<div>', {
-                class: 'columniser-text'
-            }),
-            titlesColumnLeft: !$('.titles-column-left').length ? $('<div>', {
-                class: 'titles-column-left'
-            }) : $('.titles-column-left'),
-            title: !$('.title').length ? $('<div>', {
-                class: 'title'
-            }) : $('.title'),
-            detailsBody: !$('.details-body').length ? $('<div>', {
-                class: 'details-body'
-            }) : $('.details-body'),
-            detailsBodyEntrails: !$('.details-body-entrails').length ? $('<div>', {
-                class: 'details-body-entrails'
-            }) : $('.details-body-entrails'),
-            detailsBodyDescription: !$('.details-body-description').length ? $('<div>', {
-                class: 'details-body-description'
-            }) : $('.details-body-description'),
-            detailsBodyPre: !$('.details-body-pre').length ? $('<pre>', {
-                class: 'details-body-pre'
-            }) : $('.details-body-pre'),
-            detailsBodyCode: !$('.details-body-code').length ? $('<code>', {
-                class: 'details-body-code prettyprint lang-js linenums'
-            }) : $('.details-body-code'),
-            leftRightContainer: $('<div>', {
-                class: 'left-right-container'
-            }),
-            span: $('<span>'),
-            subParent: $('<div>', {
-                class: 'subParent'
-            }).css('overflow', 'hidden'),
-            subParentArrowRight: $('<div>', {
-                class: 'subparentarrowright'
-            }).css({
-                'pointer-events': 'none'
-            }),
-            scrollingForAnimatedColumnView: function() {},
-            animate: function(el, speed, parent, subParentArrow2Change, scrollingForAnimatedColumnView) {
-                $(el).css('pointer-events', 'none');
-                $(parent).css('pointer-events', 'none');
-                var interval,
-                    _toggleSubParentArrowChange = function(subParentArrow2Change) {
-                        if (subParentArrow2Change) {
-                            if (subParentArrow2Change.className === 'subparentarrowright') {
-                                subParentArrow2Change.className = 'subparentarrowdownward'
-                            } else if (subParentArrow2Change.className === 'subparentarrowdownward') {
-                                subParentArrow2Change.className = 'subparentarrowright';
-                            }
-                        }
-                    };
-                if (parseInt(el.style.opacity) < 1 || parseInt(el.style.opacity) === 0) {
-                    el.style.display = '';
-                    interval = setInterval(function() {
-                        if (parseFloat(el.style.opacity) < 1) {
-                            el.style.opacity = parseFloat(el.style.opacity) + 0.1;
-                        } else {
-                            clearInterval(interval);
-                            $(el).css('pointer-events', '');
-                            _toggleSubParentArrowChange(subParentArrow2Change);
-                            $(parent).css('pointer-events', '');
-                            $(parent).css('overflow', '');
-                            if (typeof scrollingForAnimatedColumnView === 'function') {
-                                scrollingForAnimatedColumnView();
-                            }
-                        }
-                    }, speed);
-                } else if (parseInt(el.style.opacity) === 1 || parseInt(el.style.opacity) > 1) {
-                    interval = setInterval(function() {
-                        if ((parseFloat(parseFloat(el.style.opacity).toFixed(2))) > 0) {
-                            el.style.opacity = parseFloat(parseFloat(el.style.opacity).toFixed(2)) - 1 / 10;
-                        } else {
-                            clearInterval(interval);
-                            $(el).css('pointer-events', '');
-                            el.style.display = 'none';
-                            _toggleSubParentArrowChange(subParentArrow2Change);
-                            $(parent).css('overflow', 'hidden');
-                            $(parent).css('pointer-events', '');
-                            if (typeof scrollingForAnimatedColumnView === 'function') {
-                                scrollingForAnimatedColumnView();
-                            }
-                        }
-                    }, speed);
-                }
+function Config() {
+    var config = {
+        altCol: {
+            'cssSelectors': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssSelectors.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'cssSelectors2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssSelectors2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'cssSelectors3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssSelectors3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
             },
-            subParentBuild: function(i) {
-                var _this = this,
-                    subParents = {},
-                    subParentsIndexed = {},
-                    children = {},
-                    _subParent,
-                    subParentsArrayed = [],
-                    _subParentFinalize = function(El) {
-                        El.css('height', parseInt(El.children().first().css('padding-top') ? El.children().first().css('padding-top').match(/\d+/)[0] : 0) +
-                            parseInt(El.children().first().css('padding-bottom') ? El.children().first().css('padding-bottom').match(/\d+/)[0] : 0) +
-                            Math.ceil(parseFloat(El.children().first().css('height').match(/\d+[\\.]?\d+/) ? El.children().first().css('height').match(/\d+[\\.]?\d+/)[0] : 0)) + 'px');
-                        El.on('click', function(e) {
-                            if (e.target.className === 'series' || e.target.className === 'title') {
-                                var _subRoutine = function(_El, parent, subParentArrow2Change, scrollingForAnimatedColumnView) {
-                                        if (_El.className === 'subParent') {
-                                            _El.style.display = 'inline';
-                                            if (!_El.firstChild.style.opacity || parseInt(_El.firstChild.style.opacity) < 1) {
-                                                _El.firstChild.style.opacity = 0;
-                                            } else {
-                                                _El.firstChild.style.opacity = 1;
-                                            }
-                                            _this.animate(_El.firstChild, 60, parent, subParentArrow2Change);
-                                        } else {
-                                            if (!_El.style.opacity || parseInt(_children[i].style.opacity) < 1) {
-                                                _El.style.opacity = 0;
-                                            } else {
-                                                _El.style.opacity = 1;
-                                            }
-                                            _El.style.display = '';
-                                            _this.animate(_El, 60, parent, subParentArrow2Change);
-                                        }
-                                        if (scrollingForAnimatedColumnView && typeof scrollingForAnimatedColumnView === 'function') {
-                                            scrollingForAnimatedColumnView();
-                                        }
-                                    },
-                                    _children = [],
-                                    firstSubParent,
-                                    parent = this,
-                                    subParentArrow2Change;
-                                if ((e.target.className === 'series' &&
-                                        e.target['innerText' in e.target ? 'innerText' : 'innerHTML'] ===
-                                        this.firstElementChild.getElementsByTagName('span')[0]
-                                        ['innerText' in this.firstElementChild.getElementsByTagName('span')[0] ? 'innerText' : 'innerHTML']
-                                    ) || (e.target.className === 'title' &&
-                                        e.target.getElementsByTagName('span')[0]['innerText' in e.target.getElementsByTagName('span')[0] ? 'innerText' : 'innerHTML'] ===
-                                        this.firstElementChild.getElementsByTagName('span')[0]['innerText' in this.firstElementChild.getElementsByTagName('span')[0] ? 'innerText' : 'innerHTML']
-                                    )) {
-                                    if (this.firstChild.querySelector('div').className === 'subparentarrowright') {
-                                        subParentArrow2Change = this.firstChild.querySelector('div');
-                                        _children = _children.concat(Array.prototype.slice.call(this.children));
-                                        _children.splice(0, 1);
-                                    } else if (this.firstChild.querySelector('div').className === 'subparentarrowdownward') {
-                                        subParentArrow2Change = this.firstChild.querySelector('div');
-                                        var _router = function(arr) {
-                                            for (var i = arr.length; i--;) {
-                                                if (arr[i].className === 'subParent' && arr[i].querySelector('.subparentarrowdownward')) {
-                                                    arr[i].querySelector('.subparentarrowdownward').className = 'subparentarrowright';
-                                                    _router(arr[i].children);
-                                                } else {
-                                                    _children.splice(_children.length, 0, arr[i]);
-                                                }
-                                            }
-                                        };
-                                        _children = _children.concat(Array.prototype.slice.call(this.children));
-                                        _children.splice(0, 1);
-                                        _router(_children);
-                                    }
-                                    for (var i = 0; i < _children.length; i += 1) {
-                                        _subRoutine(_children[i], parent);
-                                        if (i === _children.length - 1) {
-                                            _subRoutine(_children[i], parent, subParentArrow2Change, _this.scrollingForAnimatedColumnView);
-                                        }
-                                    }
-                                    _children = [];
-                                }
-                            }
-                        });
-                    },
-                    divideSubParents = function(arr, counter, prevParent, mainParentToBeMadeBold) {
-                        if (!counter) {
-                            var counter = 0;
-                        }
-                        for (var i = 0; i < arr.length; i++) {
-                            if (typeof arr[i] === 'string' && ({}).toString.call(arr[i + 1]) === '[object Array]') {
-                                counter++;
-                                var subParent = arr[i];
-                                subParentsIndexed[subParent] = counter;
-                                subParents[subParent] = $('<div>', {
-                                    class: 'subParent'
-                                }).css('overflow', 'hidden').css('display', 'inline');
-                                if (mainParentToBeMadeBold && that.tabsNumberByKey[mainParentToBeMadeBold[0]] === 0) {
-                                    subParents[subParent].append(_this.title.clone().css('padding-bottom', 8 + 'px').css('padding-left', 8 + 'px').css('padding-top', 8 + 'px').append(_this.subParentArrowRight.clone()).append(_this.span.clone().text(mainParentToBeMadeBold[0]).addClass('series').css({
-                                        'font-weight': 'bold'
-                                    })));
-                                } else {
-                                    subParents[subParent].append(_this.title.clone().css('padding-bottom', 8 + 'px').css('padding-left', 8 + 'px').css('padding-top', 8 + 'px').append(_this.subParentArrowRight.clone().css('margin-left', '15px')).append(_this.span.clone().text(subParent).addClass('series')));
-                                }
-                            } else if (({}).toString.call(arr[i]) === '[object Array]') {
-                                if (subParent) {
-                                    if (!children[subParent]) {
-                                        children[subParent] = [];
-                                    }
-                                    if (arr[i].length === 1 || typeof arr[i][1] === 'string') {
-                                        children[subParent].push(_this.title.clone().css('display', 'none').css('padding-bottom', 8 + 'px').css('padding-top', 4 + 'px').css('padding-left', 8 + 'px').append(_this.span.clone().css('margin-left', '30px').text(arr[i][0])));
-                                    }
-                                }
-                                divideSubParents(arr[i], counter, subParent);
-                            } else if (typeof arr[i] === 'string' && prevParent) {
-                                if (!(arr[i] in subParents)) {
-                                    if ((function(El) {
-                                            for (var i = children[prevParent].length; i--;) {
-                                                if (children[prevParent][i].text() === El) {
-                                                    return false;
-                                                } else {
-                                                    continue;
-                                                }
-                                            }
-                                            return true;
-                                        })(arr[i])) {
-                                        children[prevParent].push(_this.title.clone().css('display', 'none').css('padding-bottom', 8 + 'px').css('padding-top', 4 + 'px').css('padding-left', 8 + 'px').append(_this.span.clone().css('margin-left', '30px').text(arr[i])));
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    _subRoutine = function() {
-                        if (children) {
-                            for (var key in children) {
-                                if (key in subParents) {
-                                    if (({}).toString.call(children[key]) === '[object Array]') {
-                                        for (var i = 0; i < children[key].length; i += 1) {
-                                            subParents[key].append(children[key][i]);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        children = null;
-                        for (var key in subParentsIndexed) {
-                            subParentsArrayed.splice(subParentsIndexed[key], 0, key);
-                        }
-                        for (var i = subParentsArrayed.length; i--;) {
-                            if (subParentsArrayed[i] in subParents) {
-                                if (subParents[subParentsArrayed[i - 1]]) {
-                                    subParents[subParentsArrayed[i]].css('display', 'none');
-                                    subParents[subParentsArrayed[i - 1]].append(subParents[subParentsArrayed[i]]);
-                                    _subParentFinalize(subParents[subParentsArrayed[i]]);
-                                    delete subParents[subParentsArrayed[i]];
-                                }
-                            }
-                        }
-                        _subParentFinalize(subParents[Object.keys(subParents)[0]]);
-                        _this.titlesColumnLeft.append(subParents[Object.keys(subParents)[0]]);
-                    };
-                if (({}).toString.call(taskNames[i]) === '[object Array]') {
-                    divideSubParents(taskNames[i], null, null, taskNames[i]);
-                    _subRoutine();
-                }
+			'whiteSpaceInCSSRules': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/whiteSpaceInCSSRules.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'whiteSpaceDoesMatterWhen': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/whiteSpaceDoesMatterWhen.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssGlobalSelectors': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssGlobalSelectors.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssClassSelectors': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssClassSelectors.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssIDSelectors': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssIDSelectors.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
             },
-            fn: function() {
-                that.wrapper.append(this.columniser);
-                $('.header').append(this.columniserText.text('Back'));
-                $('.columniser').append(this.columniserText.clone().text(''));
-                that.wrapper.append(this.leftRightContainer);
-                $('.left-right-container').append(this.titlesColumnLeft);
-                $('.left-right-container').append(this.detailsBody);
-                this.detailsBody.append(this.detailsBodyEntrails);
-                this.detailsBodyEntrails.append(this.detailsBodyPre);
-                this.detailsBodyPre.append(this.detailsBodyCode);
-                this.detailsBody.append(this.detailsBodyDescription);
-                if (that.numberOfTitles) {
-                    var __length = taskNames.length;
-                    for (var i = 0; i < __length; i += 1) {
-                        if (({}).toString.call(taskNames[i]) === '[object String]') {
-                            this.titlesColumnLeft.append(this.title.clone().css('padding-bottom', 8 + 'px').css('padding-top', 4 + 'px').css('padding-left', 8 + 'px').append(this.span.clone().text(taskNames[i])));
-                        } else if (({}).toString.call(taskNames[i]) === '[object Array]') {
-                            this.subParentBuild(i);
-                        }
-                    }
-                }
+			
+			'cssElementSpecificSelectors': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssElementSpecificSelectors.png ",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'cssNamingConventions': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssNamingConventions.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssDescendentSelectors': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssDescendentSelectors.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'cssDescendentSelectorsExample1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssDescendentSelectorsExample1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssDescendentSelectorsExample1_1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssDescendentSelectorsExample1_1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssDescendentSelectorsExample1_2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssDescendentSelectorsExample1_2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssDescendentSelectorsExample1_3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssDescendentSelectorsExample1_3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssGroupingSelectors1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssGroupingSelectors1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssGroupingSelectors2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssGroupingSelectors2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'externalStyleSheets': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/externalStyleSheets.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'linkTag': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/linkTag.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'embeddedStyles': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/embeddedStyles.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'inlineStyles': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/inlineStyles.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'cssOrderOfApplication1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssOrderOfApplication1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'cssOrderOfApplication2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssOrderOfApplication2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'cssOrderOfApplication3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssOrderOfApplication3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssOrderOfApplication4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssOrderOfApplication4.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'inheritance': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/inheritance.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'specificity': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/specificity.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'specificityCalculator': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/specificityCalculator.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cumulativeStyles': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cumulativeStyles.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'specificityRulesExample1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/specificityRulesExample1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'specificityRulesExample2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/specificityRulesExample2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'specificityRulesExample3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/specificityRulesExample3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'specificityRulesExample4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/specificityRulesExample4.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'lvha1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/lvha1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'lvha2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/lvha2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'pseudoClasses': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/pseudoClasses.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'pseudoElements': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/pseudoElements.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'cssPropertyInheritedOrNot': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/cssPropertyInheritedOrNot.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'textFormatting1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/textFormatting1.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'textFormatting2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/textFormatting2.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'textFormatting3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/textFormatting3.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'textFormatting4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/textFormatting4.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'fontProperties': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/fontProperties.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'fixedUnitsVsRelativeUnits': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/fixedUnitsVsRelativeUnits.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'fontsRelativeOfEachOther': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/fontsRelativeOfEachOther.png",
+                'width': '50%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'fontWeight_fontStyle1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/fontWeight_fontStyle1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'fontWeight_fontStyle2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/fontWeight_fontStyle2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'font_variant': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/font_variant.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+
+			'text_transform': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/text_transform.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'text_indent': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/text_indent.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'text_indent1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/text_indent1.png",
+                'width': '60%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'line_height': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/line_height.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'boxModel': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/boxModel.png",
+                'width': '100%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'boxModel1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/boxModel.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'boxModel2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/boxModel2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'boxModel3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/boxModel3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'padding1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/padding1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'padding2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/padding2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'padding3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/padding3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'padding4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/padding4.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'padding5': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/padding5.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'margin1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/margin1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'margin2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/margin2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'margin3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/margin3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'borders1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/borders1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'borders2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/borders2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'borders3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/borders3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'borders4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/borders4.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'background1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'background2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'background3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'background4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background4.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			'background5': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background5.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'background6': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background6.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'background7': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background7.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'background8': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background8.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'background9': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background9.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'background10': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background10.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'background11': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background11.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'background12': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background12.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'background13': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background13.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'background14': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background14.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'background15': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background15.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'background16': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background16.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'background17': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/background17.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'layout1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'layout2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'layout3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'layout4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout4.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'layout5': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout5.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'layout6': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout6.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'layout7': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout7.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'layout8': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/layout8.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'float1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'float2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float2.png",
+                'width': '75%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'float3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float3.png",
+                'width': '75%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			'float4': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float4.png",
+                'width': '75%',
+                'enlargeToWidth': 50,
+                'left': 25
+            },
+			
+			'float5': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float5.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'float6': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float6.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'float7': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float7.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'float8': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float8.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'float9': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/float9.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'prefixes1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/prefixes1.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'prefixes2': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/prefixes2.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'prefixes3': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/prefixes3.png",
+                'width': '95%',
+                'enlargeToWidth': 50,
+                'left': 25
+            }, 
+			
+			'webPractice1': {
+                'state': {
+                    'click': 0,
+                    'keyup': 0
+                },
+                '_config': null,
+                'src': "images/webPractice1.png",
+                'width': '85%',
+                'enlargeToWidth': 75,
+                'left': 25
             }
-        };
-    elements.fn();
-}
-Accordeon.prototype.tabulator = function(tabsNum, tabsNames, jsonObject, clickedTitleText) {
-    'use strict';
-    var that = this,
-        elements = {
-            wrapper: $('<div>', {
-                class: 'tabulator-wrapper'
-            }),
-            ul: $('<ul>', {
-                class: 'tabulator-ul'
-            }),
-            li: $('<li>', {
-                class: 'tabs-li'
-            }),
-            span: $('<span>'),
-            div: $('<div>', {
-                class: 'tabulator-div'
-            }),
-            scrollingLeft: !$('.scrolling-left').length ? $('<div>', {
-                class: 'scrolling-left'
-            }) : $('.scrolling-left'),
-            scrollingRight: !$('.scrolling-right').length ? $('<div>', {
-                class: 'scrolling-right'
-            }) : $('.scrolling-left'),
-            arrowLeft: $('<div>', {
-                class: 'arrow-left'
-            }),
-            arrowRight: $('<div>', {
-                class: 'arrow-right'
-            }),
-            tabsOverallWidth: 0,
-            _i: tabsNum,
-            arrOverflowingTabs: [],
-            arrOverflowingTabsWidth: 0,
-            TabsBeforeOverflowingTab: [],
-            overFlowIndex: [],
-            clicksCount: 0,
-            _width: 0,
-            overFlow: function(arr) {
-                if (!this.TabsBeforeOverflowingTab.length) {
-                    var allTabs = $('.tabulator-div'),
-                        prevTabBeforeOverflowingTab;
-                    for (var i = allTabs.length; arr.length && i--;) {
-                        if (i && ~allTabs[i]['innerText' in $('.tabulator-div')[0] ? 'innerText' : 'innerHTML'].indexOf(arr[0]['innerText' in arr[0] ? 'innerText' : 'innerHTML'])) {
-                            prevTabBeforeOverflowingTab = i > 0 ? allTabs[i - 1] : allTabs[i];
-                        }
-                        if (i && prevTabBeforeOverflowingTab) {
-                            this.TabsBeforeOverflowingTab.push(allTabs[i - 1]);
-                        }
-                    }
-                }
-            },
-            buildTabs: function() {
-                if (!$('.columniser-text').eq(1).length) {
-                    $('.columniser').append($('<div>', {
-                        'class': 'columniser-text'
-                    }));
-                    $('.columniser-text').eq(1).append(this.wrapper);
+        },
+		
+        getter: function(alt, _config, src, width, enlargeToWidth, left) {
+            if (_config && alt) {
+                return config.altCol[alt] && config.altCol[alt]['_config'] ? config.altCol[alt]['_config'] : null;
+            } else if (!_config && alt && !src && !width && !enlargeToWidth && !left) {
+                if (config.altCol[alt]) {
+                    return config.altCol[alt] && config.altCol[alt]['state'] ? config.altCol[alt]['state'] : null;
                 } else {
-                    $('.columniser-text').eq(1).append(this.wrapper);
+                    return false;
                 }
-                this.wrapper.append(this.ul);
-                while (this._i--) {
-                    this.ul.append(this.li.clone().append(this.div.clone().append(this.span.clone().text(tabsNames[this._i]))));
-                    this.tabsOverallWidth += ($('.tabulator-div').last().outerWidth());
-                    if (this.tabsOverallWidth > $('.tabulator-wrapper').outerWidth()) {
-                        this.arrOverflowingTabs.push($('.tabulator-div').last()[0]);
-                        this.arrOverflowingTabsWidth += $('.tabulator-div').last().outerWidth();
-                    }
-                }
-                $(this.arrOverflowingTabs).each(function() {
-                    $(this).parent().css('display', 'none');
-                });
-            },
-            scrollingArrows: function() {
-                if (!$('.scrolling-right').length) {
-                    $('.tabulator-ul').append(this.scrollingRight.append(this.arrowRight));
-                }
-                if (!$('.scrolling-left').length) {
-					$('.tabulator-ul li:first').before(this.scrollingLeft);
-                    this.scrollingLeft.append(this.arrowLeft);
-                }
-            },
-            correctingOverflowingContainerWidth: function() {
-                this.tabsOverallWidth += (10 * tabsNum) + $('.scrolling-left').outerWidth() + $('.scrolling-right').outerWidth();
-                $('.tabulator-ul').width(this.tabsOverallWidth + 'px');
-            },
-            overFlowIndexCalculate: function() {
-                if (!this.overFlowIndex.length) {
-                    for (var i = 0; i < this.arrOverflowingTabs.length; i++) {
-                        this._width += this.arrOverflowingTabs[i].parentNode.offsetWidth;
-                        if (this._width + (this.arrOverflowingTabs[i + 1] ? this.arrOverflowingTabs[i + 1].parentNode.offsetWidth : this.arrOverflowingTabs[i].parentNode.offsetWidth) > $('.tabulator-wrapper').outerWidth()) {
-                            this.overFlowIndex.push(i);
-                            this._width = 0;
-                        } else if (this._width < $('.tabulator-wrapper').outerWidth() && i === this.arrOverflowingTabs.length - 1) {
-                            this.overFlowIndex.push(i + 1);
-                            this._width = 0;
-                        }
-                        if (i === this.arrOverflowingTabs.length - 1 && this.overFlowIndex[this.overFlowIndex.length - 1] !== i + 1) {
-                            this.overFlowIndex.push(i + 1);
-                        }
-                    }
-                }
-            },
-            correctingTabsBeforeOverflowingTabWidth: function() {
-                if (this.TabsBeforeOverflowingTab.length) {
-                    var TabsBeforeOverflowingTabOverallWidth = 0,
-                        dif,
-                        difPerEach,
-                        rounding;
-                    $(this.TabsBeforeOverflowingTab).each(function() {
-                        TabsBeforeOverflowingTabOverallWidth += $(this).outerWidth();
-                    });
-                    dif = ($('.tabulator-wrapper').outerWidth() - TabsBeforeOverflowingTabOverallWidth);
-                    if (dif <= 2) {} else if (dif == 0) {
-                        dif = 0.5 * this.TabsBeforeOverflowingTab.length;
-                        difPerEach = 0.5;
-                        rounding = difPerEach - (difPerEach | 0);
-                        $(this.TabsBeforeOverflowingTab).each(function() {
-                            $(this).parent().css('width', difPerEach + $(this).outerWidth() + 'px');
-                        });
-                        $('.tabulator-ul').width($('.tabulator-ul').width() + dif + Math.ceil(rounding) + 'px');
-                    } else if ((dif + TabsBeforeOverflowingTabOverallWidth) > $('.tabuator-wrapper').outerWidth()) {
-                        $('.tabulator-wrapper').outerWidth(dif + TabsBeforeOverflowingTabOverallWidth + 'px');
-                        difPerEach = ($('.tabulator-wrapper').outerWidth() - TabsBeforeOverflowingTabOverallWidth) / (this.TabsBeforeOverflowingTab.length);
-                        $(this.TabsBeforeOverflowingTab).each(function() {
-                            $(this).parent().css('width', difPerEach + $(this).outerWidth() + 'px');
-                        });
-                    }
-                }
-            },
-            posting: function(path) {
-                'use strict';
-                if (Object.prototype.toString.call(path) === '[object String]') {
-                    var _request = new XMLHttpRequest();
-                    if (!~navigator.userAgent.indexOf('IE')) {
-                        _request.overrideMimeType('application/json');
-                    }
-                    _request.open('get', path, true);
-                    _request.onreadystatechange = function() {
-                        if (_request.readyState === 4) {
-                            var _text = _request.responseText;
-                            if (_text) {
-                                    $('body').trigger('posting', [
-                                        _text,
-                                        (path.match(/code/i) ? path.match(/code/i)[0] : "")
-                                    ]);
-                            }
-                        }
-                    };
-                    _request.send();
-                }
-            },
-            runOnce: false,
-            rightClickFn: function(_this) {
-				var tabsLiCol = document.querySelectorAll('.tabs-li'),
-                    tabsLiColwidth = 0;
-                Array.prototype.forEach.call(tabsLiCol, function(i, j) {
-                    if (i.style.display !== 'none') {
-                         tabsLiColwidth += i.offsetWidth;
-					}});
-                $('.tabulator-wrapper').outerWidth(tabsLiColwidth + 1);
-				/*-------------*/
-                $(_this.arrOverflowingTabs).each(function() {
-                    $(this).css('display', '');
-                    $(this).parent().css('display', '');
-                });
-                _this.clicksCount += 1;
-                if (_this.arrOverflowingTabsWidth < $('.tabulator-wrapper').outerWidth()) {
-                    $(_this.TabsBeforeOverflowingTab).each(function() {
-                        $(this).parent().css('display', 'none');
-                    });
-                } else if (_this.clicksCount === 1) {
-                    $(_this.TabsBeforeOverflowingTab).each(function() {
-                        $(this).parent().css('display', 'none');
-                    })
-                    _this.overFlowIndexCalculate();
-                    for (var i = _this.overFlowIndex[_this.clicksCount - 1] + 1; i < _this.arrOverflowingTabs.length; i++) {
-                        _this.arrOverflowingTabs[i].parentNode.style.display = 'none';
-                    }
-                    (function() {
-                        if (!_this.runOnce) {
-                            return (function() {
-                                _this.runOnce = true;
-                                for (var i = _this.overFlowIndex[_this.clicksCount - 1] + 1; i--;) {
-                                    if (_this.arrOverflowingTabs[i]) {
-                                        _this._width += _this.arrOverflowingTabs[i].offsetWidth;
-                                    }
-                                }
-                                var _dif = ($('.tabulator-wrapper').outerWidth() - _this._width),
-                                    _difPerEach = _dif / (_this.overFlowIndex[_this.clicksCount - 1] + 1),
-                                    rounding = _difPerEach - (_difPerEach | 0);
-                                for (var i = _this.overFlowIndex[_this.clicksCount - 1] + 1; i--;) {
-                                    if (_this.arrOverflowingTabs[i] && _this.arrOverflowingTabs[i].parentNode) {
-                                        _this.arrOverflowingTabs[i].parentNode.style.width = _this.arrOverflowingTabs[i].parentNode.offsetWidth + (_difPerEach | 0) + (Math.ceil(rounding)) + 'px';
-                                    }
-                                }
-                                $('.tabulator-ul').width($('.tabulator-ul').width() + _this.width + _dif + Math.ceil(rounding) + 'px');
-                            })();
-                        }
-                    })()
-                } else if (_this.clicksCount > 1 && !!_this.overFlowIndex[_this.clicksCount - 1]) {
-                    if (_this.overFlowIndex[_this.clicksCount - 2] + 1 !== _this.overFlowIndex[_this.clicksCount]) {
-                        for (var i = _this.overFlowIndex[_this.clicksCount - 2] + 1; i--;) {
-                            _this.arrOverflowingTabs[i].parentNode.style.display = 'none';
-                            _this.arrOverflowingTabs[i].style.display = 'none';
-                        }
-                        for (var i = _this.overFlowIndex[_this.clicksCount - 2 + 1], j = _this.arrOverflowingTabs.length - 1; i < j; j--) {
-                            _this.arrOverflowingTabs[j].parentNode.style.display = 'none';
-                            _this.arrOverflowingTabs[j].style.display = 'none';
-                        }
-
-                    }(function() {
-                        var _width = 0,
-                            _dif = 0,
-                            _difPerEach = 0,
-                            rounding = 0,
-                            count = 0,
-                            checkSum;
-                        return (function() {
-                            for (var i = _this.overFlowIndex[_this.clicksCount - 2] + 1; i < _this.overFlowIndex[_this.clicksCount - 1] + 1; i++) {
-                                if (_this.arrOverflowingTabs[i] && !_this.arrOverflowingTabs[i].className.match(/calibrated/)) {
-                                    _width += _this.arrOverflowingTabs[i].offsetWidth;
-                                    _this.arrOverflowingTabs[i].className = _this.arrOverflowingTabs[i].className + ' calibrated';
-                                    count++;
-                                }
-                            }
-                            _dif = $('.tabulator-wrapper').outerWidth() - _width;
-                            _difPerEach = count && _dif ? _dif / count : 0;
-                            rounding = _difPerEach ? _difPerEach - (_difPerEach | 0) : 0;
-                            checkSum = _width + ((_difPerEach | 0) + (Math.ceil(rounding) ? Math.ceil(rounding) / 2 : 0)) * count;
-                            for (var i = _this.overFlowIndex[_this.clicksCount - 2] + 1; i < _this.overFlowIndex[_this.clicksCount - 1] + 1; i++) {
-                                if (_this.arrOverflowingTabs[i]) {
-                                    if (checkSum > $('.tabulator-wrapper').outerWidth()) {
-                                        _this.arrOverflowingTabs[i].parentNode.style.width =
-                                            _this.arrOverflowingTabs[i].parentNode.offsetWidth + (_difPerEach | 0) + 'px';
-                                    } else {
-                                        _this.arrOverflowingTabs[i].parentNode.style.width = _this.arrOverflowingTabs[i].parentNode.offsetWidth + (_difPerEach | 0) + (Math.ceil(rounding) ? Math.ceil(rounding) / 2 : 0) + 'px';
-                                    }
-                                }
-                            }
-                            $('.tabulator-ul').width($('.tabulator-ul').width() + _width + _dif + Math.ceil(rounding) + 'px');
-
-                        })();
-                    })();
-                }
-                if (_this.clicksCount > 1 && !_this.overFlowIndex[_this.clicksCount] || _this.overFlowIndex[_this.clicksCount - 2 + 1] == _this.arrOverflowingTabs.length - 1) {
-                    $('.scrolling-right').css('display', 'none');
-                    $('.scrolling-left').css('display', '');
-                }
-            },
-            leftClickFn: function(_this) {
-                $(_this.TabsBeforeOverflowingTab).each(function() {
-                    $(this).parent().css('display', '');
-                });
-                $(_this.arrOverflowingTabs).each(function() {
-                    $(this).parent().css('display', 'none');
-                })
-                $('.scrolling-right').css('display', '');
-                $('.scrolling-left').css('display', 'none');
-                _this.clicksCount = 0;
-                return _this.TabsBeforeOverflowingTab;
-            },
-            tabsClickAndPostingCall: function(_this, THIS) {
-                var clickedTabTitle,
-                    ClickedTabTitlePathText = '',
-                    _subRoutine = function(arr, clickedTabTitle) {
-                        for (var i = arr.length; !ClickedTabTitlePathText && i--;) {
-                            if (({}).toString.call(arr[i]) === '[object Object]') {
-                                for (var q in arr[i]) {
-                                    if (({}).toString.call(arr[i][q]) === '[object Array]') {
-                                        _subRoutine(arr[i][q], clickedTabTitle);
-                                    } else if (({}).toString.call(arr[i][q]) === '[object Object]') {
-                                        if (clickedTitleText in arr[i]) {
-                                            if (({}).toString.call(arr[i][clickedTitleText]) === '[object Object]') {
-                                                if (clickedTabTitle in arr[i][clickedTitleText]) {
-                                                    ClickedTabTitlePathText = arr[i][clickedTitleText][clickedTabTitle];
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    };
-                if ('innerText' in THIS) {
-                    clickedTabTitle = THIS['innerText'].replace(/\s+$/, '');
-                } else if ('innerHTML' in THIS) {
-                    clickedTabTitle = clickedTabTitle = THIS['innerHTML'].match(/<span.*>.*<\/span>/)[0].match(/<span.*>(.*)<\/span>/)[1];
-                }
-                for (var i in jsonObject) {
-                    if (({}).toString.call(jsonObject[i]) === '[object Object]' && i === clickedTitleText && jsonObject[i][clickedTabTitle]) {
-                        ClickedTabTitlePathText = jsonObject[i][clickedTabTitle];
-                        break;
-                    } else if (({}).toString.call(jsonObject[i]) === '[object Array]' && !ClickedTabTitlePathText) {
-                        _subRoutine(jsonObject[i], clickedTabTitle);
-                        if (ClickedTabTitlePathText) {
-                            break;
-                        }
-                    }
-                }
-                _this.posting(ClickedTabTitlePathText);
-            },
-            arrowsHover4iOSnMS: function() {
-                if ('ontouchstart' in document.createElement('div')) {
-                    $('.scrolling-left').on('touchstart', function() {
-                        var el = $(this.firstChild);
-                        el.css('border-top', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-bottom', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-right', '17px solid #C51F00');
-                    });
-                    $('.scrolling-right').on('touchstart', function() {
-                        var el = $(this.firstChild);
-                        el.css('border-top', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-bottom', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-left', '17px solid #C51F00');
-                    });
-                } else {
-                    $('.scrolling-left').on('mouseover', function() {
-                        var el = $(this.firstChild);
-                        el.css('border-top', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-bottom', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-right', '17px solid #C51F00');
-                    });
-                    $('.scrolling-left').on('mouseleave', function() {
-                        var el = $(this.firstChild);
-                        el.css('border-top', '10px solid rgba(0, 0, 0, 0)');
-                        el.css('border-bottom', '10px solid rgba(0, 0, 0, 0)');
-                        el.css('border-right', '10px solid #C51F00');
-                    });
-                    $('.scrolling-right').on('mouseover', function() {
-                        var el = $(this.firstChild);
-                        el.css('border-top', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-bottom', '17px solid rgba(0, 0, 0, 0)');
-                        el.css('border-left', '17px solid #C51F00');
-                    });
-                    $('.scrolling-right').on('mouseleave', function() {
-                        var el = $(this.firstChild);
-                        el.css('border-top', '10px solid rgba(0, 0, 0, 0)');
-                        el.css('border-bottom', '10px solid rgba(0, 0, 0, 0)');
-                        el.css('border-left', '10px solid #C51F00');
-                    });
-                }
-            },
-			fn: function(rightClickFn, leftClickFn, tabsClickAndPostingCall) {
-                $('body').off('title-change');
-                $('body').on('title-change', function() {
-                    if ($('#clickableTitleArrow').length) {
-                        $('#clickableTitleArrow').parent().css('color', '#C51F00');
-                        $('#clickableTitleArrow').parent().css('background-color', '')
-                        $('#clickableTitleArrow').remove();
-                    }
-                    _this.clicksCount = 0;
-                    this.overFlowIndex = [];
-                    this.TabsBeforeOverflowingTab = [];
-                });
-                var _this = this,
-                    eventName;
-                if ('ontouchstart' in document) {
-                    eventName = 'touchstart';
-                } else {
-                    eventName = 'click';
-                }
-                _this.buildTabs();
-                if (this.tabsOverallWidth > $('.tabulator-wrapper').outerWidth()) {
-                    _this.scrollingArrows();
-                    _this.overFlow(_this.arrOverflowingTabs);
-                    _this.correctingOverflowingContainerWidth();
-                    var tabsLiCol = document.querySelectorAll('.tabs-li'),
-                        tabsLiColwidth = 0,
-                        index = 0,
-                        _w = 0;
-                    $('.arrow-left').on(eventName, function(e) {
-                        var tabsBeforeOverflowingTabs = leftClickFn(_this),
-                            _w = 0;
-                        tabsBeforeOverflowingTabs.forEach(function(i, j) {
-                            _w += i.offsetWidth;
-                        });
-                        $('.tabulator-wrapper').outerWidth(_w);
-                    });
-                    $('.arrow-right').on(eventName, function() {
-                        rightClickFn(_this);
-                        var tabsLiCol = document.querySelectorAll('.tabs-li'),
-                            tabsLiColwidth = 0;
-                        Array.prototype.forEach.call(tabsLiCol, function(i, j) {
-                            if (i.style.display !== 'none') {
-                                tabsLiColwidth += i.offsetWidth;
-                            }
-                        });
-                        $('.tabulator-wrapper').outerWidth(tabsLiColwidth + 1);
-                    });
-                    _this.arrowsHover4iOSnMS();
-                }
-					$(window).off('keyup').on('keyup', function(e) {
-						switch(e.keyCode) {
-							case 39:{
-								if($('.scrolling-right').css('display') !== 'none') {
-									$('.arrow-right').trigger('click');	
-								}								
-								break;
-							}
-							case 37:{
-								if($('.scrolling-left').css('display') !== 'none') {
-									$('.arrow-left').trigger('click');
-								}
-								break;
-							}
-						}
-					});
-                _this.correctingTabsBeforeOverflowingTabWidth();
-                $('.tabs-li').on(eventName, function() {
-					$(document).trigger('instance.u');
-                    tabsClickAndPostingCall(_this, this);
-                    if ($('.tabs-li').length > 1) {
-                        if ($('.tabs-li').first().children().first().css('background-color') === 'rgb(197, 31, 0)' &&
-                            $('.tabs-li').first().children().first().children().first().css('color') === 'rgb(255, 255, 255)') {
-                            $('.tabs-li').first().children().first().css('background-color', '');
-                            $('.tabs-li').first().children().first().children().first().css('color', '');
-                        }
-                        $('.tabs-li').not(':first').each(function() {
-                            $(this).children().first().css('background-color', '');
-                            $(this).children().first().children().first().css('color', '');
-                        });
-                        this.firstChild.style.backgroundColor = 'rgb(197, 31, 0)';
-                        this.firstChild.firstChild.style.color = 'rgb(255, 255, 255)';
-                    }
-                });
-                if ($('.tabs-li').length) {
-                    $('.tabs-li').first().trigger('click').trigger('touchstart');
-                    $('.tabs-li').first().children().first().css('background-color', '#C51F00').children().first().css('color', 'white');
-                }
+            } else if (!arguments.length) {
+                return Object.keys(config.altCol);
+            } else if (alt && src) {
+                return config.altCol[alt] && config.altCol[alt]['src'] ? config.altCol[alt]['src'] : null;
+            } else if (alt && width) {
+                return config.altCol[alt] && config.altCol[alt]['width'] ? config.altCol[alt]['width'] : null;
+            } else if (alt && enlargeToWidth) {
+                return config.altCol[alt] && config.altCol[alt]['enlargeToWidth'] ? config.altCol[alt]['enlargeToWidth'] : null;
+            } else if (alt && left) {
+                return config.altCol[alt] && config.altCol[alt]['left'] ? config.altCol[alt]['left'] : null;
             }
-        };
-    elements.fn(elements.rightClickFn, elements.leftClickFn, elements.tabsClickAndPostingCall);
-}
-
-function POST(url) {
-    'use strict';
-    if (Object.prototype.toString.call(url) === '[object String]') {
-        var request = new XMLHttpRequest();
-        if (!~navigator.userAgent.indexOf('IE')) {
-            request.overrideMimeType('application/json');
-        }
-        request.open('get', url, true);
-        request.onreadystatechange = function() {
-            if (request.readyState === 4) {
-                var jsonObject = JSON.parse(request.responseText);
-                if (jsonObject) {
-                    $('body').trigger('post', jsonObject);
-                }
-            }
-        };
-        request.send();
-    }
-}
-
-function getTabsNumber(jsonObject) {
-    'use strict';
-    var _tabsNumber = {},
-        _length,
-        _objectRouter = function(obj, flag) {
-            if (!flag) {
-                _length = Object.keys(obj).length;
-                if (i in _tabsNumber) {
-                    if (!({}).toString.call(_tabsNumber[i]) === '[object Array]') {
-                        var _t = [];
-                        _t.push(_tabsNumber[i]);
-                        _t.push(_length);
-                        _tabsNumber[i] = _t;
-                    } else {
-                        _tabsNumber[i].push(_length);
-                    }
-                } else {
-                    _tabsNumber[i] = _length;
-                }
-            } else {
-                for (var key in obj) {
-                    if (({}).toString.call(obj[key] === '[object Object]')) {
-                        _length = Object.keys(obj[key]).length;
-                        if (_tabsNumber[key]) {
-                            if (({}).toString.call(_tabsNumber[key]) !== '[object Array]') {
-                                var _t = [];
-                                _t.push(_tabsNumber[key]);
-                                _t.push(_length);
-                                _tabsNumber[key] = _t;
-                            } else {
-                                _tabsNumber[key].push(_length);
-                            }
-                        } else {
-                            _tabsNumber[key] = _length;
-                        }
+        },
+        setter: function(alt, val, _config) {
+            if (_config && alt) {
+                !config.altCol[alt]['_config'] ? config.altCol[alt]['_config'] = _config : '';
+            } else if (alt && val) {
+                if (({}).toString.call(val) === '[object Object]') {
+                    for (var i in val) {
+                        config.altCol[alt]['state'][i] = val[i];
                     }
                 }
             }
         },
-        _subRoutine = function(arr, flag) {
-            for (var _i = arr.length; _i--;) {
-                if (({}).toString.call(arr[_i]) === '[object Object]') {
-                    for (var _key in arr[_i]) {
-                        if (({}).toString.call(arr[_i][_key]) === '[object Object]' && !_tabsNumber[_key]) {
-                            _objectRouter(arr[_i], true);
-                        } else if (({}).toString.call(arr[_i][_key]) === '[object Array]') {
-                            if (!_tabsNumber[_key]) {
-                                _tabsNumber[_key] = 0;
-                            }
-                            _subRoutine(arr[_i][_key], true);
-                        }
-                    }
+        domReady: function(callback) {
+            config.eventsBinder(document, 'DOMContentLoaded', function() {
+                callback();
+                callback = function() {};
+            });
+            config.eventsBinder(document, 'readystatechange', function() {
+                if (document.readyState === 'complete') {
+                    callback();
+                    callback = function() {};
                 }
+            });
+        },
+        eventsBinder: function(El, event, handler) {
+            if (El && El.addEventListener) {
+                El.addEventListener(event, handler);
+            } else if (El && El.attachEvent) {
+                El.attachEvent('on' + event, handler);
             }
-        };
-    for (var i in jsonObject) {
-        if (Object.prototype.toString.call(jsonObject[i]) === '[object Object]') {
-            _objectRouter(jsonObject[i]);
-        } else if (({}).toString.call(jsonObject[i]) === '[object Array]') {
-            if (_tabsNumber[i]) {
-                var _t = [];
-                _t.push(_tabsNumber[i]);
-                _t.push(0);
-                _tabsNumber[i].push(_t);
-            } else {
-                _tabsNumber[i] = 0;
-            }
-            _subRoutine(jsonObject[i]);
-        }
-    }
-    return _tabsNumber;
-}
-
-function getTasksNames(jsonObject) {
-    'use strict';
-    var _tasksNames = [],
-        subRoutineArr = [],
-        _subRoutine = function(arr, flag, _flag) {
-            for (var i = 0; i < arr.length; i++) {
-                if (({}).toString.call(arr[i]) === '[object Object]') {
-                    for (var j in arr[i]) {
-                        if (j && ({}).toString.call(j) === '[object String]' && ({}).toString.call(arr[i][j]) === '[object Object]') {
-                            if (flag) {
-                                if (!_t) {
-                                    var _t = [];
-                                    _t.push(j);
-                                } else if (_t) {
-                                    _t.push(j);
-                                }
-                                if (i === arr.length - 1 && _flag) {
-                                    subRoutineArr.push(subRoutineArr.splice(subRoutineArr.length - 1, 1));
-                                    subRoutineArr[subRoutineArr.length - 1].push(_t)
-                                } else if (i === arr.length - 1) {
-                                    subRoutineArr.push(_t);
-                                }
-                            } else {
-                                subRoutineArr.push(j);
-                            }
-                        } else if (({}).toString.call(j) === '[object String]' && ({}).toString.call(arr[i][j]) === '[object Array]') {
-                            typeof subRoutineArr[subRoutineArr.length - 1]
-                            subRoutineArr.push(j);
-                            if (typeof subRoutineArr[subRoutineArr.length - 1] === 'string' && typeof subRoutineArr[subRoutineArr.length - 2] === 'string') {
-                                _subRoutine(arr[i][j], true, true);
-                            } else {
-                                _subRoutine(arr[i][j], true);
-                            }
-                        }
-                    }
-                }
-            }
-        };
-    for (var i in jsonObject) {
-        if (({}).toString.call(i) === '[object String]') {
-            if (({}).toString.call(jsonObject[i]) === '[object Object]') {
-                _tasksNames.push(i);
-            } else if (({}).toString.call(jsonObject[i]) === '[object Array]') {
-                var t = [];
-                t.push(i);
-                _subRoutine(jsonObject[i]);
-                t.push(subRoutineArr);
-                _tasksNames.push(t);
-                subRoutineArr = [];
-            }
-        }
-    }
-    return _tasksNames;
-}
-var url,
-    tasksNumber = false,
-    tabsNumber,
-    accordeon,
-    taskNames,
-    eventName;
-if ('ontouchstart' in document) {
-    eventName = 'touchstart';
-} else {
-    eventName = 'click';
-}
-$('document').ready(function(){ 
-    'use strict';
-    $('body').on('posting', function(e, _text, description) {
-            $('.details-body-entrails').css('display', 'none');
-			if (description.match(/code/i)) {
-                $('.details-body-description')[0]['innerText' in $('.details-body-code')[0] ? 'innerText' : 'innerHTML'] = '';
-                $('.details-body-entrails').css('display', '');
-                $('.details-body-code')[0]['innerText' in $('.details-body-code')[0] ? 'innerText' : 'innerHTML'] = _text;
-            }else {
-				$('.details-body-description')[0]['innerText' in $('.details-body-code')[0] ? 'innerText' : 'innerHTML'] = '';
-                $('.details-body-description').append(_text);
+        },
+        eventsUnbinder: function(El, event, handler) {
+            if (El && El.removeEventListener) {
+                El.removeEventListener(event, handler);
+            }else if(El && El.detachEvent){
+				El.detachEvent('on' + event, handler);
 			}
-            
-            if ($('.prettyprinted').length) {
-                $('.prettyprinted').removeClass('prettyprinted');
-            }
-            prettyPrint();
-        
-    });
-    $('body').on('post', function(e, jsonObject) {
-        var tabsNumberByKey = getTabsNumber(jsonObject),
-            tasksNumber = (function() {
-                var returnable = 0;
-                for (var i in tabsNumberByKey) {
-                    if (i && ({}).toString.call(tabsNumberByKey[i]) === '[object Number]') {
-                        returnable += 1;
-                    } else if (i && ({}).toString.call(tabsNumberByKey[i]) === '[object Array]') {
-                        returnable += tabsNumberByKey[i].length;
-                    }
-                }
-                return returnable;
-            })(),
-            taskNames = getTasksNames(jsonObject),
-            accordeon = new Accordeon($('.accordeon-wrapper'), tasksNumber, 30, tabsNumberByKey),
-            text,
-            tabsNames = [];
-        accordeon.build(taskNames);
-        $('.title').on(eventName, function(e) {
+        },
+        url: 'data/slides.js',
+        slidesCollection: '',
+        postingCalls: function(url, jsonify) {
             'use strict';
-			$(document).trigger('instance.u');
-            tabsNames = [];
-            $('body').trigger('title-change');
-            $('.details-body-code')[0]['innerText' in $('.details-body-code')[0] ? 'innerText' : 'innerHTML'] ? $('.details-body-code')[0]['innerText' in $('.details-body-entrails')[0] ? 'innerText' : 'innerHTML'] = '' : null;
-            $('.details-body-description')[0]['innerText' in $('.details-body-code')[0] ? 'innerText' : 'innerHTML'] ? $('.details-body-description')[0]['innerText' in $('.details-body-code')[0] ? 'innerText' : 'innerHTML'] = '' : null;
-            if (e.target.tagName === 'DIV') {
-                text = e.target.firstChild['innerText' in e.target.firstChild ? 'innerText' : 'innerHTML'];
-                if (text) {
-                    $(e.target).prepend($('<div>', {
-                        id: 'clickableTitleArrow',
-                        html: '&#10147;',
-                        style: 'display : inline; margin-left: 5%; font-size: 17px;'
-                    }));
-                    $('#clickableTitleArrow').parent().css('color', '#fff');
-                    $('#clickableTitleArrow').parent().css('background-color', '#C51F00');
+            if (Object.prototype.toString.call(url) === "[object String]") {
+                var request = new XMLHttpRequest();
+                if (!~navigator.userAgent.indexOf('IE')) {
+                    request.overrideMimeType("application/json");
                 }
-            } else {
-                text = e.target['innerText' in e.target.firstChild ? 'innerText' : 'innerHTML'];
-                if (text && tabsNumberByKey[text]) {
-                    $(e.target.parentNode).prepend($('<div>', {
-                        id: 'clickableTitleArrow',
-                        html: '&#10147;',
-                        style: 'display : inline; margin-left: 5%; font-size: 17px;'
-                    }));
-                    $('#clickableTitleArrow').parent().css('color', '#fff');
-                    $('#clickableTitleArrow').parent().css('background-color', '#C51F00');
+                request.open('get', url, true);
+                request.onreadystatechange = function() {
+                    if (request.readyState === 4) {
+                        if (jsonify) {
+                            config.slidesCollection = JSON.parse(request.responseText);
+                            config.post = function() {
+                                config.getSlideHTML();
+                            };
+                            /*
+                            	the instance is statically non-changing:
+                            	therefore this function as part of the expernalized post 
+                            	method has to be redefined for onscroll event to work:
+                            */
+                            config.getSlidesCollection = config.getSlideHTML;
+                            config.post();
+							
+                        } else {
+                            var _slide_ = request.responseText;
+                            var lastSlide = document.querySelector('.slide-wrapper:last-of-type') ||
+                                document.querySelector('.slide-wrapper');
+                            var lastSlideParent = lastSlide.parentNode;
+								lastSlideParent.innerHTML = lastSlideParent.innerHTML + _slide_;
+                                config.menu.cleanMenu();
+                            
+                            if (parseInt(instance.slideIndexArray[instance.slideIndexArray.length - 1]) && document.querySelectorAll(`.slide-wrapper[index]`)[parseInt(instance.slideIndexArray[instance.slideIndexArray.length - 1])]){                               
+                                config.animatory.deanimate(document.querySelectorAll(`.slide-wrapper[index]`)[parseInt(instance.slideIndexArray[instance.slideIndexArray.length - 1])]);
+                                config.animatory.animate(document.querySelectorAll(`.slide-wrapper[index]`)[parseInt(instance.slideIndexArray[instance.slideIndexArray.length - 1])], 100, 0.2);
+                            }
+								instance.setImgs();
+						}
+                    }
+                }
+                request.send();
+            }
+        },
+        closest: function(el, tagName, className) {
+            while (el && el != document.body && el.tagName != tagName) {
+                el = el.parentNode;
+            }
+            return el && el.tagName == tagName && el.className == className? el : null;
+        },
+		setImagesPer_AJAX_InjectedSlides : function() {
+			instance.g().forEach(function(i) {
+				var img = new Image(),
+					parent = i ? document.querySelector('#' + i) : '';
+				if (parent && !parent.children.length) {
+					img.alt = i;
+					img.src = instance.g(i, '', 1);
+					img.style.cursor = 'pointer';
+					img.style.width = instance.g(i, '', '', 1);
+					parent ? parent.appendChild(img) : null;
+				}
+		});
+	}, 
+       getSlidesCollection: function() {
+            if (Object.prototype.toString.call(config.url) === "[object String]" && !config.slidesCollection) { 
+                config.postingCalls(config.url, true);
+            }
+        },
+       getSlideHTML: function() {
+            var slidesCollection = config.slidesCollection[Object.keys(config.slidesCollection)[0]];
+            if (slidesCollection && slidesCollection.length) {
+                if (instance.slideIndex && slidesCollection[instance.slideIndex]) {
+                    config.postingCalls(slidesCollection[instance.slideIndex]);
+                    config.slidesCollection[Object.keys(config.slidesCollection)[0]][instance.slideIndex] = '';
+                    instance.slideIndex = '';
                 }
             }
-            if (text in tabsNumberByKey && tabsNumberByKey[text]) {
-				$('.header .columniser-text').css('visibility', 'visible');
-                if (Object.prototype.toString.call(jsonObject[text]) === '[object Object]') {
-                    for (var j in jsonObject[text]) {
-                        tabsNames.push(j);
-                    }
-                } else {
-                    var _subRoutine = function(arr) {
-                        for (var i = arr.length; i--;) {
-                            if (({}).toString.call(arr[i]) === '[object Object]') {
-                                for (var k in arr[i]) {
-                                    if (({}).toString.call(arr[i][k]) === '[object Object]') {
-                                        if (k === text) {
-                                            for (var _k in arr[i][k]) {
-                                                tabsNames.push(_k);
-                                            }
-                                        }
-                                    } else if (({}).toString.call(arr[i][k]) === '[object Array]') {
-                                        _subRoutine(arr[i][k]);
+        },
+        post: function() {
+            config.getSlidesCollection();
+        },
+        constructor: function(targetEl, _e, _g, s, _u) {
+            var _config = {
+                documentCreateElement: function(El, id, style, text) {
+                    var returnable;
+                    if (El) {
+                        returnable = document.createElement(El);
+                        id ? returnable.id = id : '';
+                        if (style && ({}).toString.call(style) === '[object Array]') {
+                            for (var i = style.length; i--;) {
+                                if (({}).toString.call(style[i]) === '[object Object]') {
+                                    for (var j in style[i]) {
+                                        returnable.style[j] = style[i][j];
                                     }
                                 }
                             }
                         }
-                    };
-                    for (var q in jsonObject) {
-                        if (({}).toString.call(jsonObject[q]) === '[object Array]') {
-                            _subRoutine(jsonObject[q]);
+                        if (text && ({}).toString.call(text) === '[object String]') {
+                            returnable['innerText' in returnable ? 'innerText' : 'innerHTML'] = text;
                         }
                     }
-                }
-                $('.tabulator-wrapper').remove();
-                $('.arrow-left').off(eventName);
-                $('.arrow-right').off(eventName);
-                $('.tabs-li').off(eventName);
-                accordeon.tabulator(tabsNumberByKey[text], tabsNames, jsonObject, text);
-                $('.columniser-text').first().append($('<div></div>', {
-                    'style': 'float: left;',
-                    'class': 'breadcrumb'
-                }).append($('<span></span>', {
-                    'style': 'font-family: \'Segoe UI\'; font-size: 14px; cursor: pointer; color:#6690BC;'
-                }).text($('.columniser-text').first().text())));
-                $('.columniser-text').first().html($('.columniser-text').first().html().replace($('.columniser-text').first().html().match(/^(.*)<div/)[1], ''));
-				$('.columniser-text:first div').prepend($('<i></i>', {
-                    'style': 'color: #6690BC; cursor: pointer;', 
-					'class' : 'fa fa-chevron-left',
-					'aria-hidden' : 'true'
-                }));
-                $('.titles-column-left').css('display', 'none');
-                $('.columniser-text').has('.breadcrumb').on('click', function(e) {
-					if(!$('.header .columniser-text').length){
-						$('.header').append($('.columniser-text').has('.breadcrumb'));
-					}
-					$(document).trigger('instance.u');
-					$(this).css("visibility", "hidden");
-                    $('.titles-column-left').css('display', '');
-                    $('.columniser-text').has('.tabulator-wrapper').remove();
-                    $('.scrolling-left').remove();
-                    $('.scrolling-right').remove();
-                    $('.details-body-code').html('');
-                    $('.details-body-description').html('');
-                });
-            }
-            if (tabsNumberByKey[text] === 0 || !tabsNumberByKey[text]) {
-                $('.tabulator-wrapper').remove();
-                $('.arrow-left').off(eventName);
-                $('.arrow-right').off(eventName);
-                $('.tabs-li').off(eventName);
-                $('.scrolling-left').css('display', 'none');
-                $('.scrolling-right').css('display', 'none');
-
-            } else {
-                (function() {
-                    var _width = 0;
-                    $('.tabs-li div').each(function() {
-                        _width += $(this).outerWidth();
-                    })
-                    if (_width < $('.tabulator-wrapper').outerWidth()) {
-                        $('.scrolling-left').css('display', 'none');
-                        $('.scrolling-right').css('display', 'none');
-                    } else {
-                        $('.scrolling-left').css('display', '');
-                        $('.scrolling-right').css('display', '');
+                    return returnable;
+                },
+                appendOpacityDivToBody: function() {
+                    document.body.appendChild(_config.documentCreateElement('div', 'OpacityDivToBody', [{
+                        'backgroundColor': '#000'
+                    }, {
+                        'bottom': '0'
+                    }, {
+                        'left': '0'
+                    }, {
+                        'opacity': '0.7'
+                    }, {
+                        'position': 'fixed'
+                    }, {
+                        'right': '0'
+                    }, {
+                        'top': '0'
+                    }, {
+                        'zIndex': '9999'
+                    }]));
+                },
+                scroller: function(e) {
+                    var event = window.event || e,
+                        delta = event.detail ? event.detail * (-120) : event.wheelDelta,
+                        subRoutine = function(d) {
+                            var handledImageContainer = document.querySelector('#handledImageContainer');
+                            if (d >= 120 && handledImageContainer) {
+                                handledImageContainer.style.width = parseInt(handledImageContainer.style.width.match(/\d+/)) + 1 + '%';
+                            }
+                            if (d <= -120 && handledImageContainer) {
+                                handledImageContainer.style.width = parseInt(handledImageContainer.style.width.match(/\d+/)) - 1 + '%';
+                            }
+                        };
+                    if (delta && event.ctrlKey) {
+                        subRoutine(delta);
                     }
-                })();
+                    return false;
+                },
+                slides_scroller: function(e) {
+                    var event = window.event || e,
+                        delta = event.detail ? event.detail * (-120) : event.wheelDelta,
+                        subRoutine = function(d) {
+                            var slide = document.querySelector('#handledSlideContainer');
+                            if (d >= 120 && slide) {
+                                slide.style.width = parseInt(handledImageContainer.style.width.match(/\d+/)) + 1 + '%';
+                            }
+                            if (d <= -120 && slide) {
+                                slide.style.width = parseInt(handledImageContainer.style.width.match(/\d+/)) - 1 + '%';
+                            }
+                        };
+                    if (delta && event.ctrlKey) {
+                        subRoutine(delta);
+                    }
+                    return false;
+                },
+                arrowPress: function(e) {
+					var event = e || window.event,
+                    handled_Image_Slide_Container = document.querySelector('#handledImageContainer') || document.querySelector('#handledSlideContainer'),
+					leftDefaultValue = 
+					handled_Image_Slide_Container ? _g(handled_Image_Slide_Container.querySelector('img') ? handled_Image_Slide_Container.querySelector('img').alt : '', '', '', '', '', 1) : 35,
+                    imageParentNodeEnlargedWidth = handled_Image_Slide_Container && handled_Image_Slide_Container.querySelector('img') ? _g(handled_Image_Slide_Container.querySelector('img').alt, '', '', '', 1) : 90;
+					
+                    switch (event.keyCode.toString()) {
+						case '32':
+                            {	
+								event.preventDefault();
+								if(instance.slideLiCol && instance.slideLiCol.length){
+									instance.slideLiCol[0].style.visibility = 'visible';
+									Array.prototype.splice.call(instance.slideLiCol, 0, 1);
+								}
+								break;
+                            }
+						
+                        case '38':
+                            {
+                                handled_Image_Slide_Container ? handled_Image_Slide_Container.style.top =
+                                parseInt(handled_Image_Slide_Container.style.top.match(/[-]?\d+/)) - 1 + '%' : null;
+                                break;
+                            }
+                        case '40':
+                            {
+                                handled_Image_Slide_Container ? handled_Image_Slide_Container.style.top =
+                                parseInt(handled_Image_Slide_Container.style.top.match(/[-]?\d+/)) + 1 + '%' : null;
+                                break;
+                            }
+                        case '37' || '':
+                            {
+                                if (handled_Image_Slide_Container) {
+                                    !handled_Image_Slide_Container.style.left ||
+                                        parseInt(handled_Image_Slide_Container.style.left.match(/[-]?\d+/)) > leftDefaultValue ?
+                                        handled_Image_Slide_Container.style.left = leftDefaultValue + '%' : handled_Image_Slide_Container.style.left;
+                                    handled_Image_Slide_Container.style.left = parseInt(handled_Image_Slide_Container.style.left.match(/[-]?\d+/)) - 1 + '%';
+                                }
+                                break;
+                            }
+                        case '39':
+                            {
+                                if (handled_Image_Slide_Container) {
+                                    !handled_Image_Slide_Container.style.left ||
+                                        parseInt(handled_Image_Slide_Container.style.left.match(/[-]?\d+/)) < leftDefaultValue ?
+                                        handled_Image_Slide_Container.style.left = leftDefaultValue + '%' : handled_Image_Slide_Container.style.left;
+                                    handled_Image_Slide_Container.style.left =
+                                        parseInt(handled_Image_Slide_Container.style.left.match(/[-]?\d+/)) + 1 + '%';
+
+                                }
+                                break;
+                            }
+                        case '48':
+                            {
+                                if (handled_Image_Slide_Container && event.ctrlKey) {
+                                    parseInt(handled_Image_Slide_Container.style.width.match(/[-]?\d+/)) > imageParentNodeEnlargedWidth ||
+                                        parseInt(handled_Image_Slide_Container.style.width.match(/[-]?\d+/)) < imageParentNodeEnlargedWidth ?
+                                        handled_Image_Slide_Container.style.width = imageParentNodeEnlargedWidth + '%' : '';
+                                    parseInt(handled_Image_Slide_Container.style.left.match(/[-]?\d+/)) !== leftDefaultValue ?
+                                        handled_Image_Slide_Container.style.left = leftDefaultValue + '%' : '';
+                                }
+                                break;
+                            }
+                        case '187':
+                            {
+                                if (handled_Image_Slide_Container && event.ctrlKey) {
+                                    handled_Image_Slide_Container.style.width = parseInt(handled_Image_Slide_Container.style.width.match(/\d+/)) + 1 + '%';
+                                }
+                                break;
+                            }
+
+                        case '189':
+                            {
+                                if (handled_Image_Slide_Container && event.ctrlKey) {
+                                    handled_Image_Slide_Container.style.width = parseInt(handled_Image_Slide_Container.style.width.match(/\d+/)) - 1 + '%';
+                                }
+                                break;
+                            }
+                    }
+					return false;
+                },
+                handler: function(e) {
+                    var _e = e || event,
+                        executable,
+                        _ex = e.target,
+                        subRoutine = function(eventType) {
+
+                            var OpacityDivToBody = document.getElementById('OpacityDivToBody');
+                            if (OpacityDivToBody) {
+                                OpacityDivToBody.parentNode.removeChild(OpacityDivToBody);
+                            }
+                            if (document.querySelector('#wrapper') && document.querySelector('#handledImageContainer')) {
+                                document.querySelector('#wrapper').removeChild(document.querySelector('#handledImageContainer'));
+                            }
+                            _u(_ex, eventType, _config.handler);
+                            _u(document, event.type, _config.scroller);
+                            _u(window, eventType, _config.handler);
+
+                            var a = {};
+                            a[eventType.toString()] = 0;
+                            s(targetEl.alt, a);
+                        };
+
+                    if (_e.type === 'keyup' | 'onkeyup') {
+                        executable = function() {
+                            if (_e.keyCode.toString() === '27') {
+                                subRoutine(_e.type);
+                            }
+                        };
+                    } else if (_e.type === 'click' | 'onclick') {
+                        executable = function() {
+                            subRoutine(_e.type);
+                        };
+                    }
+                    executable();
+                },
+                slidesHandler: function(e) {
+                    var _e = e || event,
+                        executable,
+                        _ex = e.target,
+                        subRoutine = function(eventType) {
+                            var OpacityDivToBody = document.getElementById('OpacityDivToBody');
+                            if (OpacityDivToBody) {
+                                OpacityDivToBody.parentNode.removeChild(OpacityDivToBody);
+                            }
+                            if (document.querySelector('#wrapper') && document.querySelector('#handledSlideContainer')) {
+                                document.querySelector('#wrapper').removeChild(document.querySelector('#handledSlideContainer'));
+                            }
+                            _u(_ex, eventType, _config.handler);
+                            _u(document, event.type, _config.scroller);
+                            _u(window, eventType, _config.handler);
+                        };
+
+                    if (_e.type === 'keyup' | 'onkeyup') {
+                        executable = function() {
+                            if (_e.keyCode.toString() === '27') {
+                                subRoutine(_e.type);
+                            }
+                        };
+                    } else if (_e.type === 'click' | 'onclick') {
+                        executable = function() {
+                            subRoutine(_e.type);
+                        };
+                    }
+                    executable();
+                },
+                handleImageContainer: function() {
+                    if (targetEl) {
+                        if (!document.getElementById('handledImageContainer')) {
+
+                            var _el = _config.documentCreateElement('div', 'handledImageContainer', [{
+                                    'display': 'block'
+                                }, {
+                                    'width': _g(targetEl.alt, '', '', '', 1) + '%'
+                                }, {
+                                    'position': 'fixed'
+                                }, {
+                                    'zIndex': '10001'
+                                }, {
+                                    'top': '5%'
+                                }, {
+                                    'background': '#FFF'
+                                }, {
+                                    'text-align': 'center'
+                                }, {
+                                    'left': (_g(targetEl.alt, '', '', '', '', 1) + '%') ? (_g(targetEl.alt, '', '', '', '', 1) + '%') : 0
+                                }]),
+                                _ex = _config.documentCreateElement('div', '', [{
+                                    'background-image': "url('images/close.png')"
+                                }, {
+                                    'position': 'absolute'
+                                }, {
+                                    'display': 'inline-block'
+                                }, {
+                                    'background-repeat': 'no-repeat'
+                                }, {
+                                    'cursor': 'pointer'
+                                }, {
+                                    'height': '45px'
+                                }, {
+                                    'width': '40px'
+                                }, {
+                                    'top': '-20px'
+                                }, {
+                                    'max-width': '50px'
+                                }, {
+                                    'right': '-25px'
+                                }, {
+                                    'padding-left': '4px'
+                                }, {
+                                    'background-size': '40px 40px'
+                                }], ''),
+                                imgClone,
+                                mousewheelEvt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel";
+
+                            imgClone = targetEl.cloneNode();
+                            imgClone.style.width = '95%';
+                            imgClone.style.marginLeft = '0';
+                            imgClone.style.paddingTop = '8px';
+
+                            document.getElementById('wrapper').appendChild(_el);
+                            _el.appendChild(imgClone);
+                            _el.appendChild(_ex);
+
+                            if (!_g(targetEl.alt)['mousewheelEvt']) {
+                                s(targetEl.alt, {
+                                    'mousewheelEvt': 1
+                                });
+                                _e(document, mousewheelEvt, _config.scroller);
+                            }
+                            s(targetEl.alt, {
+                                'click': 1
+                            });
+                            _e(_ex, 'click', function(e) {
+                                _config.handler(e);
+                            });
+                            if (!_g(targetEl.alt)['keyup']) {
+                                s(targetEl.alt, {
+                                    'keyup': 1
+                                });
+                                _e(window, 'keyup', function(e) {
+                                    _config.handler(e);
+                                });
+                            }
+                            if (!_g(targetEl.alt)['arrowPress']) {
+                                s(targetEl.alt, {
+                                    'arrowPress': 1
+                                });
+                                _e(window, 'keydown', _config.arrowPress);
+                            }
+                            if (!document.querySelector('#OpacityDivToBody')) {
+                                _config.appendOpacityDivToBody();
+                            }
+                        }
+                    }
+                },
+                handleSlideContainer: function(which) {
+                    if (targetEl) {
+                        if (!document.getElementById('handledSlideContainer')) {
+                            var _el = _config.documentCreateElement('div', 'handledSlideContainer', [{
+                                    'display': 'block'
+                                }, {
+                                    'width': 80 + '%'
+                                }, {
+                                    'position': 'fixed'
+                                }, {
+                                    'zIndex': '10001'
+                                }, {
+                                    'top': '5%'
+                                }, {
+                                    'background': '#FFF'
+                                }, {
+                                    'text-align': 'center'
+                                }, {
+                                    'left': '10%'
+                                }]),
+                                _ex = _config.documentCreateElement('div', '', [{
+                                    'background-image': "url('images/close.png')"
+                                }, {
+                                    'position': 'absolute'
+                                }, {
+                                    'display': 'inline-block'
+                                }, {
+                                    'background-repeat': 'no-repeat'
+                                }, {
+                                    'cursor': 'pointer'
+                                }, {
+                                    'height': '45px'
+                                }, {
+                                    'width': '40px'
+                                }, {
+                                    'top': '-20px'
+                                }, {
+                                    'max-width': '50px'
+                                }, {
+                                    'right': '-25px'
+                                }, {
+                                    'padding-left': '4px'
+                                }, {
+                                    'background-size': '40px 40px'
+                                }], ''),
+                                mousewheelEvt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel", 
+								clone = which.cloneNode(true); 
+								instance.slideLiCol = Array.prototype.slice.call(clone.querySelectorAll('li:not(:nth-child(1))'));
+								Array.prototype.forEach.call(instance.slideLiCol, function(i, j) {
+									i.style.visibility = 'hidden';
+								});
+                            
+							document.getElementById('wrapper').appendChild(_el);s
+							_el.appendChild(clone);
+							
+							
+                            _el.appendChild(_ex);
+                            _e(document, mousewheelEvt, _config.slides_scroller);
+                            _e(_ex, 'click', function(e) {
+                                _config.slidesHandler(e);
+                            });
+                            _e(window, 'keyup', function(e) {
+                                _config.slidesHandler(e);
+                            });
+                            
+							_e(window, 'keydown', _config.arrowPress);
+							
+                            if (!document.querySelector('#OpacityDivToBody')) {
+                                _config.appendOpacityDivToBody();
+                            }
+                        }
+                    }
+                },
+                onclickHandler: function(which) {
+                    which && which.tagName && which.tagName == "IMG" ? _config.handleImageContainer() :
+                        _config.handleSlideContainer(which);
+                }
+            };
+            return {
+                o: _config.onclickHandler
             }
+        },
+        menu: {
+            cleanMenu: function() {
+                document.querySelector('#leftbar').innerHTML = "";
+                Array.prototype.forEach.call(document.querySelectorAll('h2'), function(i, j) {
+                    if (i.children.length) {
+                        var child = i.removeChild(i.firstChild);
+                        var text = child ? child.innerHTML : '';
+                        i.innerHTML = text ? text : i.innerHTML;
+                        i.removeAttribute('name');
+                    }
+                });
+                Array.prototype.forEach.call(document.querySelectorAll('h3'), function(i, j) {
+                    if (i.children.length) {
+                        var child = i.removeChild(i.firstChild);
+                        var text = child ? child.innerHTML : '';
+                        i.innerHTML = text ? text : i.innerHTML;
+                        i.removeAttribute('name');
+                    }
+                });
+                config.menu.buildMenu();
+            },
+            addClass: function(el, className) {
+                return el.className = className;
+            },
+            headings: function() {
+                var el = document.createElement('div');
+                config.menu.addClass(el, 'headingGroup');
+                return el;
+            },
+            a: function(el, h, n) {
+                var _a = document.createElement('a');
+                _a['innerHTML' ? 'innerHTML' : 'innerText'] = h ? h : '';
+                n ? (n.match(new RegExp('#', 'g')) ? _a.setAttribute('href', n) : _a.setAttribute('name', n)) : '';
+                return _a;
+            },
+            buildMenu: function() {
+                var leftbar = document.querySelector('#leftbar'),
+                    h2Col = document.querySelectorAll('h2'),
+                    h,
+                    headingGroup1stAnchor,
+                    recur = function(el, j, prev) {
+						if (el !== h2Col[j + 1]){
+								if (el && el.tagName == 'H3'){
+									var _h = el['innerHTML' ? 'innerHTML' : 'innerText'],
+										_name = _h.replace(/\s+/g, '');
+									el['innerHTML' ? 'innerHTML' : 'innerText'] = '';
+									el.appendChild(config.menu.a(el, _h, _name));
+									h.appendChild(config.menu.a(el, _h, '#' + _name));
+								}
+							}else {
+								return;
+							}
+							if(el && el.nextElementSibling) {
+								recur(el.nextElementSibling, j, el);
+								
+							}else if(prev.parentNode.nextElementSibling){
+								recur(prev.parentNode.nextElementSibling.firstChild, j, prev.parentNode.nextElementSibling.firstChild);
+							}else {
+								return;
+							}
+                    };
+                Array.prototype.forEach.call(h2Col, function(i, j) {
+                    i.setAttribute('name', i['innerHTML'].replace(/\s+/g, ''));
+                    h = config.menu.headings();
+                    headingGroup1stAnchor = config.menu.a(i, i.innerHTML);
+                    i.innerHTML = '';
+                    i.appendChild(headingGroup1stAnchor.cloneNode(true));
+                    i.firstChild.setAttribute('name', i['innerHTML'].match(/[^<a>].*[^</a>]/g)[0].replace(/\s+/g, ''));
+                    headingGroup1stAnchor.setAttribute('href', '#' + i.firstChild.name);
+                    h.appendChild(headingGroup1stAnchor);
+                    recur(i, j);
+                    leftbar.appendChild(h);
+                });
+                Array.prototype.forEach.call(document.querySelectorAll('.headingGroup:not(:first-child) a:not(:first-child)'), function(i, j) {
+                    i.style.display = "none";
+                });
+            },
+            slide: function(ms) {
+                var slide_itemizely = {
+                    scrollTop: document.documentElement.scrollTop || document.body.scrollTop,
+                    firstHeadingCol: document.querySelectorAll('.firstHeading'),
+                    map: {},
+                    mapper: function() {
+                        Array.prototype.forEach.call(this.firstHeadingCol, function(i, j) {
+                            slide_itemizely.map[j] = (i.offsetTop - 100);
+                        });
+                    },
+                    getter: function(key) {
+                        return this.firstHeadingCol[Object.keys(this.map)[key]]
+                    },
+                    item2Show: '',
+                    targetedElSiblings: [],
+                    counterPartNamesEls: {},
+                    router: function() {
+                        Object.keys(this.map).forEach(function(i, j) {
+                            slide_itemizely.item2Show = slide_itemizely.scrollTop >= slide_itemizely.map[i] ? i : slide_itemizely.item2Show;
+                        });
+
+                        var elCol = document.querySelectorAll('.headingGroup :first-child'),
+                            targetedEl;
+                        Array.prototype.forEach.call(elCol, function(i, j) {
+                            if (i && slide_itemizely.item2Show && i.innerHTML &&
+                                i.innerHTML == slide_itemizely.firstHeadingCol[slide_itemizely.item2Show].innerText) {
+                                targetedEl = i;
+                                while (targetedEl.nextElementSibling) {
+                                    slide_itemizely.targetedElSiblings.push(targetedEl.nextElementSibling);
+                                    targetedEl = targetedEl.nextElementSibling;
+                                }
+                                slide_itemizely.targetedElSiblings.forEach(function(i, j) {
+                                    var href = i.getAttribute("href");
+										href = href.replace(/#/, ''),
+                                        lookUpStr = 'a[name*="' + href + '"' + ']',
+                                        el = document.querySelector(lookUpStr), 
+										bodyEl2MatchHref = '',
+										bodyEl2Match = '', 
+										slide2animate = '', 
+										stickingMenuH3 = '',
+										clone = '';
+										/*
+											here we add 200 to the value of scrollTop in order to make the menu work
+											with the small-sized slides
+										*/ 
+                                    if ((slide_itemizely.scrollTop + 250) >= el.offsetTop && slide_itemizely.scrollTop) {
+                                        Array.prototype.forEach.call(document.querySelectorAll('a[style*=color]'), function(i, j) {
+                                            i.style.color = '#0066FF';
+                                            i.style.fontWeight = '';
+                                        });
+                                        i.style.color = '#000000';
+                                        i.style.fontWeight = 'bold';
+										stickingMenuH3 = document.querySelector('#stickingMenu h3');
+										if(stickingMenuH3){
+											stickingMenuH3.innerHTML = '';	
+										}
+										clone = i.cloneNode(true);
+										clone.style.color = '';
+										clone.style.fontWeight = 'normal';
+										clone.style.textDecoration = 'initial';
+										if(document.querySelector('#stickingMenu h3')){
+											document.querySelector('#stickingMenu h3').appendChild(clone);
+										}
+										bodyEl2MatchHref = i['href'].match(/#(.*)/) ? i['href'].match(/#(.*)/)[1] : null;
+										bodyEl2Match;
+										if(bodyEl2MatchHref) {
+											bodyEl2Match = document.querySelector('a[name="' +  bodyEl2MatchHref + '"]');
+										}
+										slide2animate = config.closest(bodyEl2Match, 'DIV', 'slide-wrapper');
+										if(bodyEl2Match && slide2animate){
+											config.animatory.animate(slide2animate, 100, 0.3);
+										}
+                                    }
+                                });
+                                Array.prototype.forEach.call(document.querySelectorAll('.headingGroup a:not(:first-child)'),
+                                    function(i, j) {
+                                        i.style.display = 'none';
+                                    });
+                                slide_itemizely.targetedElSiblings.forEach(function(i, j) {
+                                    i.style.display = 'block';
+                                });
+                            }
+                        });
+                        slide_itemizely.targetedElSiblings = [];
+                    }
+                };
+                if (!Object.keys(slide_itemizely.map).length) {
+                    slide_itemizely.mapper();
+                }
+                slide_itemizely.router();
+            }
+        },
+        animatory: {
+            els2ani: [],
+            mousewheelEvt: (/Firefox/i.test(navigator.userAgent)) ? 'DOMMouseScroll' : 'mousewheel',
+            appendStickyMenu: function() {
+                if (!document.getElementById('stickingMenu')) {
+                    var newEl = document.createElement('div'),
+                    insideEl = document.createElement('div');
+                    newEl.id = "stickingMenu";
+                    insideEl.id = "washer";
+                    newEl.style.opacity = '0.2';
+                    insideEl.style.width = document.querySelector('table').offsetWidth + 'px';
+                    insideEl.appendChild(document.querySelector('h3').cloneNode(true));
+                    insideEl.querySelector('h3').innerHTML = document.querySelector('h1 span').innerHTML + insideEl.querySelector('h3').innerHTML;
+                    document.body.appendChild(newEl);
+                    document.getElementById('stickingMenu').appendChild(insideEl);
+                }
+            },
+            scrollTop: function() {
+                return (document.body.scrollTop || document.documentElement.scrollTop);
+            },
+            deanimate: function(el) {
+				if(el){
+					el.style.opacity = '0.2';
+				}
+            },
+			activeState : false,
+            animate: function(el, time, step, reverse) {
+                var _interval,
+                    direct = function() {
+                        if (el && el.style.opacity && !el.style.opacity.match(/^1[.]/)) {
+							config.animatory.activeState = true;
+							el.style.opacity = parseFloat(el.style.opacity) + step;
+                        } else {
+							clearInterval(_interval);
+							config.animatory.activeState = false;
+							return true;
+                        }
+                    },
+                    obverse = function() {
+                        if (el && el.style.opacity > 0) {
+							config.animatory.activeState = true;
+                            el.style.opacity = parseFloat(el.style.opacity) - step;
+                        } else {
+							el.style.opacity = 0;
+                            clearInterval(_interval);
+							config.animatory.activeState = false;
+							return true;
+                        }
+                    };
+                _interval = setInterval(function () {
+                    reverse ? obverse() : direct();
+                }, time);	
+                // if(!config.animatory.activeState) {
+				// 	_interval = setInterval(function() {
+				// 		reverse ? obverse() : direct();
+				// 	}, time);	
+				// }
+            },
+            _windowSrollY : 0,
+            
+			handler: function(e) {
+                var _animatory = {
+                    runOnce: false,
+                    event: window.event || e,
+                    delta: (window.event || e).detail ? (window.event || e).detail * (-120) : (window.event || e).wheelDelta,
+                    upwards: function() {
+                        return this.delta >= 120 || config.animatory._windowSrollY > window.scrollY;
+                    },
+                    downwards: function() {
+                        return this.delta <= -120 || config.animatory._windowSrollY < window.scrollY;
+                    },
+                    isAllTheWayDown: function() {
+                        return window.innerHeight + 30 + (window.scrollY ? window.scrollY : window.pageYOffset) >= document.body.offsetHeight;
+                    }
+                };
+                    config.animatory.appendStickyMenu();
+					
+                    if(_animatory.upwards()) {
+                        config.animatory._windowSrollY = window.scrollY;
+                        config.animatory.animate(document.getElementById('stickingMenu'), 100, 0.03, true);
+                    }
+                    if(_animatory.downwards()) {
+                        config.animatory._windowSrollY = window.scrollY;
+                        config.animatory.animate(document.getElementById('stickingMenu'), 100, 0.03);
+                    }
+            }
+        }
+    };
+    return {
+        d: config.domReady,
+        e: config.eventsBinder,
+        u: config.eventsUnbinder,
+        s: config.setter,
+        g: config.getter,
+        F: config.constructor,
+        S: config.handleSlideContainer,
+        p: config.post,
+        c: config.closest,
+        m: config.menu,
+        ani: config.animatory,
+		setImgs	: config.setImagesPer_AJAX_InjectedSlides
+    }
+};
+var instance = !instance ? instance = new Config() : instance;
+instance.d(function() {
+    instance.m.buildMenu();
+    /* var prettyprintedElCol = document.querySelectorAll('.prettyprinted');
+    if (prettyprintedElCol.length) {
+        Array.prototype.forEach.call(prettyprintedElCol, function(i, j) {
+            i.removeAttribute('class');
         });
-		
-	});
-    url = 'data/tasks.js';
-    POST(url);
+    }
+    prettyPrint(); */
+    instance.lastSlide = document.querySelector('.slide-wrapper:last-of-type') || document.querySelector('.slide-wrapper');
+    instance.slideIndex = "";
+    instance.slideIndexArray = [];
+    instance.e(document, 'scroll', function(e) {
+        instance.lastSlide = document.querySelector('.slide-wrapper:last-of-type') || document.querySelector('.slide-wrapper');
+        instance.slideIndex = instance.lastSlide.getAttribute('index');
+        instance.lastSlideOffsetTop = instance.lastSlide.offsetTop; 
+        if (instance.slideIndex && (~~instance.slideIndexArray.indexOf(instance.slideIndex) || !instance.slideIndexArray.length)) { 
+            if (
+                instance.lastSlide && document.querySelector('.slide-wrapper:last-of-type').offsetTop >= instance.lastSlideOffsetTop) {  
+                instance.slideIndexArray.push(instance.slideIndex);
+                instance.p();
+            }
+        }
+        instance.m.slide(100);
+    });
+	instance.setImgs();
 });
+
+instance.e(document, instance.ani.mousewheelEvt, instance.ani.handler);
+instance.e(document, 'keyup', instance.ani.handler);
+instance.e(document, 'mousedown', instance.ani.handler);
+instance.e(document, 'touchend', instance.ani.handler);
+
+/* instance.e(document, 'click', function(e) {
+    var event = e || event,
+        target = event.target || event.srcElement,
+        _config;
+    if ((target.tagName === 'IMG' && instance.g(target.alt))) {
+        if (!instance.g(target.alt, 1)) {
+            _config = new instance.F(target, instance.e, instance.g, instance.s, instance.u);
+            instance.s(target.alt, '', _config);
+        }
+        if (instance.g(target.alt, 1)) {
+            instance.g(target.alt, 1).o(target);
+        }
+    } else if (instance.c(e.target, 'TABLE', 'slide')) {
+        _config = !instance.instance ? new instance.F(target, instance.e, instance.g, instance.s, instance.u) : instance.instance;
+        _config.o(instance.c(e.target, 'TABLE', 'slide'));
+    }
+}); */
+
+
+
+
+
+
